@@ -1,2 +1,10 @@
 *.png
 *.h5
+*.pdf
+*.pptx
+
+batch_scripts/
+Data/
+Output/
+logs/
+Readings/
