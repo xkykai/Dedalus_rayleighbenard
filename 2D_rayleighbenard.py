@@ -37,8 +37,8 @@ Rayleigh = 1e5
 Taylor = 1e6
 Prandtl = 1
 dealias = 3/2
-save_dt = 0.01
-stop_sim_time = 0.1
+save_dt = 0.1
+stop_sim_time = 10
 timestepper = d3.RK222
 timestep = 2e-6
 dtype = np.float64
@@ -96,19 +96,15 @@ dudz = d3.Differentiate(u, coords['z'])
 dvdz = d3.Differentiate(v, coords['z'])
 dwdz = d3.Differentiate(w, coords['z'])
 
-# w_rms = np.sqrt(np.mean(w**2))
-
 #%%
 # Problem
 # First-order form: "div(f)" becomes "trace(grad_f)"
 # First-order form: "lap(f)" becomes "div(grad_f)"
 problem = d3.IVP([p, b, u, v, w, tau_p, tau_b1, tau_b2, tau_u1, tau_u2, tau_v1, tau_v2, tau_w1, tau_w2], namespace=locals())
-# problem = d3.IVP([p, b, u, w, tau_p, tau_b1, tau_b2, tau_u1, tau_u2, tau_w1, tau_w2], namespace=locals())
 problem.add_equation("grad_u@ex + grad_w@ez + tau_p = 0")
 problem.add_equation("dt(b) - kappa*div(grad_b) + lift(tau_b2) = - u*dbdx - w*dbdz")
 problem.add_equation("dt(u) - nu*div(grad_u) - f*v + grad_p@ex + lift(tau_u2) = - u*dudx - w*dudz")
 problem.add_equation("dt(v) - nu*div(grad_v) + f*u + lift(tau_v2) = - u*dvdx - w*dvdz")
-# problem.add_equation("dt(u) - nu*div(grad_u) + grad_p@ex + lift(tau_u2) = - u*dudx - w*dudz")
 problem.add_equation("dt(w) - nu*div(grad_w) + grad_p@ez - b + lift(tau_w2) = - u*dwdx - w*dwdz")
 problem.add_equation("integ(p) = 0") # Pressure gauge
 
