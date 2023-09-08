@@ -137,7 +137,10 @@ b['g'] *= z * (Lz - z) # Damp noise at walls
 b['g'] += -S * z # Add linear background
 
 # Analysis
-snapshots = solver.evaluator.add_file_handler('snapshots', sim_dt=save_dt, max_writes=50)
+Ra_str = "{:e}".format(Rayleigh).replace(".", "pt")
+Ta_str = "{:e}".format(Taylor).replace(".", "pt")
+
+snapshots = solver.evaluator.add_file_handler(f"snapshots_Nz_{Nz}_Ra_{Ra_str}_Ta_{Ta_str}", sim_dt=save_dt, max_writes=50)
 snapshots.add_task(b, name='buoyancy')
 snapshots.add_task(u, name='u')
 snapshots.add_task(v, name='v')
