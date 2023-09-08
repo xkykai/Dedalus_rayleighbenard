@@ -27,22 +27,43 @@ import numpy as np
 import dedalus.public as d3
 import logging
 logger = logging.getLogger(__name__)
+import argparse
 #%%
+parser = argparse.ArgumentParser()
+
+parser.add_argument('--Ra', required=True, type=float)
+parser.add_argument('--Ta', required=True, type=float)
+parser.add_argument('--Nz', required=True, type=int)
+
+parser.add_argument('--Pr', default=1, type=float)
+parser.add_argument('--timestep', default=2e-6, type=float)
+parser.add_argument('--save_dt', default=0.1, type=float)
+parser.add_argument('--stop_time', default=20, type=float)
+parser.add_argument('--aspect_ratio', default=0.25, type=float)
+ 
+# Read arguments from command line
+args = parser.parse_args()
+print(args.Ra)
+
 # Parameters
-Lx, Ly, Lz = 4, 1, 1
-Nx, Ny, Nz = 128, 1, 32
-# Rayleigh = 92260.8
-# Rayleigh = 9.22e4
-Rayleigh = 1e5
-Taylor = 1e6
-Prandtl = 1
+Lz = 1
+Lx = Lz / args.aspect_ratio
+
+Nz = args.Nz
+Nx = int(Nz / args.aspect_ratio)
+
+Rayleigh = args.Ra
+Taylor = args.Ta
+Prandtl = args.Pr
+
 dealias = 3/2
-save_dt = 0.1
-stop_sim_time = 20
+save_dt = args.save_dt
+stop_sim_time = args.stop_time
 timestepper = d3.RK222
-timestep = 2e-6
+timestep = args.timestep
 dtype = np.float64
 
+print("end of variables")
 # Bases
 coords = d3.CartesianCoordinates('x', 'z')
 dist = d3.Distributor(coords, dtype=dtype)
@@ -140,7 +161,7 @@ b['g'] += -S * z # Add linear background
 Ra_str = "{:e}".format(Rayleigh).replace(".", "pt")
 Ta_str = "{:e}".format(Taylor).replace(".", "pt")
 
-snapshots = solver.evaluator.add_file_handler(f"snapshots_Nz_{Nz}_Ra_{Ra_str}_Ta_{Ta_str}", sim_dt=save_dt, max_writes=50)
+snapshots = solver.evaluator.add_file_handler(f"Data/snapshots_Nz_{Nz}_Ra_{Ra_str}_Ta_{Ta_str}_test", sim_dt=save_dt, max_writes=50)
 snapshots.add_task(b, name='buoyancy')
 snapshots.add_task(u, name='u')
 snapshots.add_task(v, name='v')
