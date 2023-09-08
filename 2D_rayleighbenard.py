@@ -37,7 +37,7 @@ parser.add_argument('--Nz', required=True, type=int)
 
 parser.add_argument('--Pr', default=1, type=float)
 parser.add_argument('--timestep', default=2e-6, type=float)
-parser.add_argument('--save_dt', default=0.1, type=float)
+parser.add_argument('--save_dt', default=0.01, type=float)
 parser.add_argument('--stop_time', default=20, type=float)
 parser.add_argument('--aspect_ratio', default=0.25, type=float)
  
@@ -159,7 +159,7 @@ b['g'] += -S * z # Add linear background
 Ra_str = "{:e}".format(Rayleigh).replace(".", "pt")
 Ta_str = "{:e}".format(Taylor).replace(".", "pt")
 
-snapshots = solver.evaluator.add_file_handler(f"Data/snapshots_Nz_{Nz}_Ra_{Ra_str}_Ta_{Ta_str}_test", sim_dt=save_dt, max_writes=50)
+snapshots = solver.evaluator.add_file_handler(f"Data/snapshots_Nz_{Nz}_Ra_{Ra_str}_Ta_{Ta_str}", sim_dt=save_dt, max_writes=50)
 snapshots.add_task(b, name='buoyancy')
 snapshots.add_task(u, name='u')
 snapshots.add_task(v, name='v')
