@@ -43,7 +43,6 @@ parser.add_argument('--aspect_ratio', default=0.25, type=float)
  
 # Read arguments from command line
 args = parser.parse_args()
-print(args.Ra)
 
 # Parameters
 Lz = 1
@@ -63,7 +62,6 @@ timestepper = d3.RK222
 timestep = args.timestep
 dtype = np.float64
 
-print("end of variables")
 # Bases
 coords = d3.CartesianCoordinates('x', 'z')
 dist = d3.Distributor(coords, dtype=dtype)
@@ -181,7 +179,6 @@ flow.add_property(np.abs(w), name='|w|')
 try:
     logger.info('Starting main loop')
     while solver.proceed:
-        timestep = timestep
         solver.step(timestep)
         if (solver.iteration-1) % logging_cadence == 0:
             max_Re = flow.max('Re')
