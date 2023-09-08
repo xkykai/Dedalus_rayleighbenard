@@ -2,6 +2,8 @@
 *.h5
 *.pdf
 *.pptx
+*.gif
+*.mp4
 
 batch_scripts/
 Data/
