@@ -152,7 +152,15 @@ solver.stop_sim_time = stop_sim_time
 #%%
 # Initial conditions
 b.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
+u.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
+v.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
+w.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
+
 b['g'] *= z * (Lz - z) # Damp noise at walls
+u['g'] *= z * (Lz - z) # Damp noise at walls
+v['g'] *= z * (Lz - z) # Damp noise at walls
+w['g'] *= z * (Lz - z) # Damp noise at walls
+
 b['g'] += -S * z # Add linear background
 
 # Analysis
@@ -163,7 +171,7 @@ Ta_str = "{:e}".format(Taylor).replace(".", "pt")
 # snapshots = solver.evaluator.add_file_handler('snapshots', sim_dt=save_dt, max_writes=50)
 # snapshots.add_task(b, name='buoyancy')
 
-snapshots = solver.evaluator.add_file_handler(f"Data/snapshots_Nz_{Nz}_Ra_{Ra_str}_Ta_{Ta_str}", sim_dt=save_dt, max_writes=50)
+snapshots = solver.evaluator.add_file_handler(f"Data/uvwb_noise_snapshots_Nz_{Nz}_Ra_{Ra_str}_Ta_{Ta_str}", sim_dt=save_dt, max_writes=50)
 # snapshots = solver.evaluator.add_file_handler(f"Data/snapshot", sim_dt=save_dt, max_writes=50)
 snapshots.add_task(b, name='buoyancy')
 snapshots.add_task(u, name='u')
