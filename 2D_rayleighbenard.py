@@ -40,16 +40,25 @@ parser.add_argument('--timestep', default=2e-6, type=float)
 parser.add_argument('--save_dt', default=0.01, type=float)
 parser.add_argument('--stop_time', default=20, type=float)
 parser.add_argument('--aspect_ratio', default=0.25, type=float)
- 
+parser.add_argument('--k', default=0, type=float)
+parser.add_argument('--n_modes', default=0, type=int)
+parser.add_argument('--Nz', default=0, type=int)
+
 # Read arguments from command line
 args = parser.parse_args()
 
 # Parameters
 Lz = 1
-Lx = Lz / args.aspect_ratio
-
 Nz = args.Nz
-Nx = int(Nz / args.aspect_ratio)
+
+if args.k == 0:
+   aspect_ratio = args.aspect_ratio
+   Nx = int(Nz / aspect_ratio)
+else:
+   aspect_ratio = 1 / (args.n_modes * 2 * np.pi / args.k)
+   Nx = args.Nx
+
+Lx = Lz / aspect_ratio
 
 Rayleigh = args.Ra
 Taylor = args.Ta
@@ -151,15 +160,15 @@ solver = problem.build_solver(timestepper)
 solver.stop_sim_time = stop_sim_time
 #%%
 # Initial conditions
-b.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
-u.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
-v.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
-w.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
+b.fill_random('g', seed=42, distribution='normal', scale=Nz/32) # Random noise
+# u.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
+# v.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
+# w.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
 
 b['g'] *= z * (Lz - z) # Damp noise at walls
-u['g'] *= z * (Lz - z) # Damp noise at walls
-v['g'] *= z * (Lz - z) # Damp noise at walls
-w['g'] *= z * (Lz - z) # Damp noise at walls
+# u['g'] *= z * (Lz - z) # Damp noise at walls
+# v['g'] *= z * (Lz - z) # Damp noise at walls
+# w['g'] *= z * (Lz - z) # Damp noise at walls
 
 b['g'] += -S * z # Add linear background
 
@@ -171,7 +180,7 @@ Ta_str = "{:e}".format(Taylor).replace(".", "pt")
 # snapshots = solver.evaluator.add_file_handler('snapshots', sim_dt=save_dt, max_writes=50)
 # snapshots.add_task(b, name='buoyancy')
 
-snapshots = solver.evaluator.add_file_handler(f"Data/uvwb_noise_snapshots_Nz_{Nz}_Ra_{Ra_str}_Ta_{Ta_str}", sim_dt=save_dt, max_writes=50)
+snapshots = solver.evaluator.add_file_handler(f"Data/k_snapshots_Nz_{Nz}_Ra_{Ra_str}_Ta_{Ta_str}", sim_dt=save_dt, max_writes=50)
 # snapshots = solver.evaluator.add_file_handler(f"Data/snapshot", sim_dt=save_dt, max_writes=50)
 snapshots.add_task(b, name='buoyancy')
 snapshots.add_task(u, name='u')
