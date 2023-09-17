@@ -42,7 +42,7 @@ parser.add_argument('--stop_time', default=20, type=float)
 parser.add_argument('--aspect_ratio', default=0.25, type=float)
 parser.add_argument('--k', default=0, type=float)
 parser.add_argument('--n_modes', default=0, type=int)
-parser.add_argument('--Nz', default=0, type=int)
+parser.add_argument('--Nx', default=0, type=int)
 
 # Read arguments from command line
 args = parser.parse_args()
