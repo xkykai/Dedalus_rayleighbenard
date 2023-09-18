@@ -44,6 +44,12 @@ parser.add_argument('--k', default=0, type=float)
 parser.add_argument('--n_modes', default=0, type=int)
 parser.add_argument('--Nx', default=0, type=int)
 
+parser.add_argument('--uv_top', default='f', choices=['f', 'v'])
+parser.add_argument('--uv_bot', default='f', choices=['f', 'v'])
+
+parser.add_argument('--b_top', default='v', choices=['f', 'v'])
+parser.add_argument('--b_bot', default='v', choices=['f', 'v'])
+
 # Read arguments from command line
 args = parser.parse_args()
 
@@ -140,35 +146,42 @@ problem.add_equation("integ(p) = 0") # Pressure gauge
 problem.add_equation("w(z=0) = 0")
 problem.add_equation("w(z=Lz) = 0")
 
-# b bcs
-problem.add_equation("b(z=0) = 0")
-problem.add_equation("b(z=Lz) = -S")
+match args.b_top:
+    case 'v':
+        problem.add_equation("b(z=Lz) = -S * Lz")
+    case 'f':
+        problem.add_equation("dbdz(z=Lz) = -S")
 
-# u, v bcs
-problem.add_equation("dudz(z=0) = 0")
-problem.add_equation("dudz(z=Lz) = 0")
-problem.add_equation("dvdz(z=0) = 0")
-problem.add_equation("dvdz(z=Lz) = 0")
+match args.b_bot:
+    case 'v':
+        problem.add_equation("b(z=0) = 0")
+    case 'f':
+        problem.add_equation("dbdz(z=0) = -S")
 
-# problem.add_equation("u(z=0) = 0")
-# problem.add_equation("u(z=Lz) = 0")
-# problem.add_equation("v(z=0) = 0")
-# problem.add_equation("v(z=Lz) = 0")
+match args.uv_top:
+    case 'v':
+        problem.add_equation("u(z=Lz) = 0")
+        problem.add_equation("v(z=Lz) = 0")
+    case 'f':
+        problem.add_equation("dudz(z=Lz) = 0")
+        problem.add_equation("dvdz(z=Lz) = 0")
+
+match args.uv_bot:
+    case 'v':
+        problem.add_equation("u(z=0) = 0")
+        problem.add_equation("v(z=0) = 0")
+    case 'f':
+        problem.add_equation("dudz(z=0) = 0")
+        problem.add_equation("dvdz(z=0) = 0")
 
 # Solver
 solver = problem.build_solver(timestepper)
 solver.stop_sim_time = stop_sim_time
 #%%
 # Initial conditions
-b.fill_random('g', seed=42, distribution='normal', scale=Nz/32) # Random noise
-# u.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
-# v.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
-# w.fill_random('g', seed=42, distribution='normal', scale=Rayleigh/100) # Random noise
+b.fill_random('g', seed=42, distribution='normal', scale=Rayleigh / 1e6 * Nz/32) # Random noise
 
 b['g'] *= z * (Lz - z) # Damp noise at walls
-# u['g'] *= z * (Lz - z) # Damp noise at walls
-# v['g'] *= z * (Lz - z) # Damp noise at walls
-# w['g'] *= z * (Lz - z) # Damp noise at walls
 
 b['g'] += -S * z # Add linear background
 
@@ -176,19 +189,12 @@ b['g'] += -S * z # Add linear background
 Ra_str = "{:e}".format(Rayleigh).replace(".", "pt")
 Ta_str = "{:e}".format(Taylor).replace(".", "pt")
 
-
-# snapshots = solver.evaluator.add_file_handler('snapshots', sim_dt=save_dt, max_writes=50)
-# snapshots.add_task(b, name='buoyancy')
-
-snapshots = solver.evaluator.add_file_handler(f"Data/k_snapshots_Nz_{Nz}_Ra_{Ra_str}_Ta_{Ta_str}", sim_dt=save_dt, max_writes=50)
-# snapshots = solver.evaluator.add_file_handler(f"Data/snapshot", sim_dt=save_dt, max_writes=50)
+snapshots = solver.evaluator.add_file_handler(f"Data/k_uv_t{args.uv_top}b{args.uv_bot}_b_t{args.b_top}b{args.b_bot}_Nz_{Nz}_Ra_{Ra_str}_Ta_{Ta_str}", sim_dt=save_dt, max_writes=200)
 snapshots.add_task(b, name='buoyancy')
 snapshots.add_task(u, name='u')
 snapshots.add_task(v, name='v')
 snapshots.add_task(w, name='w')
 snapshots.add_task(np.sqrt(d3.Average(w**2)), name='w_rms')
-
-
 
 # Flow properties
 logging_cadence = 100
